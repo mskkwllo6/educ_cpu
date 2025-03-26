@@ -3,7 +3,7 @@ module lidx(input [`WIDTH:0] i, input [`HALFWIDTH:0] iv, input [`LIDXS:0] op, ou
 //	`LIDXENUM
 	parameter THU=0, IMM=1, LIL=2, LIH=3;
 	always @*
-		casex(op)
+		case(op)
 		// synopsys full_case parallel_case
 		THU:
 			o = i;
