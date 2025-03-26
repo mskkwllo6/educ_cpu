@@ -205,7 +205,11 @@ $display("r0[%h]1[%h]2[%h]3[%h]", test.pu.rega.regar[0], test.pu.rega.regar[1],
 				2'b11:begin
 // F E D C B A 9 8 7 6 5 4 3 2 1 0
 // 1 0 0 0 rw> 1 1 im------------> ; LIH rw,im (rw=rb)
-					
+					liop = LIH;
+					iv = o[7:0];
+					we = `ASSERT;
+					wad = o[11:10];
+					rb = o[11:10];
 				end
 				endcase
 			end
