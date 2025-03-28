@@ -8,7 +8,7 @@ module pu(output we, output logic [`WIDTH:0] rwd, input clk, rst);
 	logic [`CMDS:0] o;
 	logic [`LICMDS:0] liop;
 	logic dstb;
-	rega rega(arad, brad, a, b, we, wad, rwd, clk, rst);
+	rega rega(arad, brad, a, b, we, wad, rwd, clk, rst,result,counter);
 	sel asel(a, {{(`WIDTH-`PCS){1'b0}},pca}, pcs, ao);
 	lidx lidx(b, iv, liop, bo);
 	alu alu(ao, bo, op, lp, dstb, ze, ca, sg, clk, rst);

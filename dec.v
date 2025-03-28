@@ -10,24 +10,24 @@ module dec(input [`CMDS:0] o, output logic h, we, output logic [`RASB:0] wad,
 /*
 // F E D C B A 9 8 7 6 5 4 3 2 1 0
 // 0 0 0 0 0 0 * * * * * * * * * 0 ; NOP (0) DSTB
-// 0 0 0 0 0 0 * * * * * * * * * 1 ; HALT (1)
-// 0 0 0 0 0 1 * * * * * * * * * * ; future reserved (PUSH, POP, SET(reg))
-// 0 0 0 0 1 0 rw> F op--> a-> b-> ; CAL rw=ra,rb (F=0:NORM/1:DSTB) MV
-// 0 0 0 0 1 1 * * * op--> a-> b-> ; EVA CAL ra,rb (F=0)/CMP ra,rb
-// 0 0 0 1 0 0 f f p op--> a-> b-> ; JP/BR fp [ra op rb] (ff:NC,Z,C,S)
+// 0 0 0 0 0 0 * * * * * * * * * 1 ; HALT (1)　一番最後の命令
+// 0 0 0 0 0 1 * * * * * * * * * * ; future reserved (PUSH, POP, SET(reg))使わない
+// 0 0 0 0 1 0 rw> F op--> a-> b-> ; CAL rw=ra,rb (F=0:NORM/1:DSTB) MV　計算
+// 0 0 0 0 1 1 * * * op--> a-> b-> ; EVA CAL ra,rb (F=0)/CMP ra,rb　評価
+// 0 0 0 1 0 0 f f p op--> a-> b-> ; JP/BR fp [ra op rb] (ff:NC,Z,C,S)　ジャンプ[ジャンプ先のアドレス]
 // 0 0 0 1 0 1 * * * * * * * * * * ; future reserved
-// 0 0 0 1 1 0 F * * op--> a-> b-> ; SM [ra]=rb / SM [ra] = [ra op rb] *MM
-// 0 0 0 1 1 1 rw> F op--> a-> b-> ; LM rw=[ra op rb] / LM rw=[rb] *MM
-// 0 0 1 # rw> a-> im------------> ; CAL rw=ra,im (#=0:ADD/1:SUB only)
-// 0 1 0 p 0 * f f im------------> ; JP/BR fp [(s)im]
-// 0 1 0 * 1 0 b-> im------------> ; SM [(s)im]=rb *MM
-// 0 1 0 p 1 1 f f im------------> ; JP/BR fp [PC + (s)im]
-// 0 1 1 p a-> f f im------------> ; JP/BR fp [ra + (s)im]
-// 1 0 0 0 rw> 0 0 0 0 0 0 0 S C Z ; LI rw,SM S:sign C:carry Z:zero
-// 1 0 0 0 rw> 0 1 im------------> ; LI rw,(s)im (rw=rb) lidx=o[9:8]
-// 1 0 0 0 rw> 1 0 im------------> ; LIL rw,im (rw=rb)
-// 1 0 0 0 rw> 1 1 im------------> ; LIH rw,im (rw=rb)
-// 1 0 0 1 rw> * * im------------> ; LM rw=[im] *MM
+// 0 0 0 1 1 0 F * * op--> a-> b-> ; SM [ra]=rb / SM [ra] = [ra op rb] *MM 使わない
+// 0 0 0 1 1 1 rw> F op--> a-> b-> ; LM rw=[ra op rb] / LM rw=[rb] *MM 使わない
+// 0 0 1 # rw> a-> im------------> ; CAL rw=ra,im (#=0:ADD/1:SUB only) ra
+// 0 1 0 p 0 * f f im------------> ; JP/BR fp [(s)im]　 PCのimっていうアドレスにジャンプ
+// 0 1 0 * 1 0 b-> im------------> ; SM [(s)im]=rb *MM つかわない
+// 0 1 0 p 1 1 f f im------------> ; JP/BR fp [PC + (s)im] 
+// 0 1 1 p a-> f f im------------> ; JP/BR fp [ra + (s)im] 
+// 1 0 0 0 rw> 0 0 0 0 0 0 0 S C Z ; LI rw,SM S:sign C:carry Z:zero 使わない
+// 1 0 0 0 rw> 0 1 im------------> ; LI rw,(s)im (rw=rb) lidx=o[9:8] 使わない
+// 1 0 0 0 rw> 1 0 im------------> ; LIL rw,im (rw=rb) 使う
+// 1 0 0 0 rw> 1 1 im------------> ; LIH rw,im (rw=rb) 使う
+// 1 0 0 1 rw> * * im------------> ; LM rw=[im] *MM 
 // 1 0 1 0 rw> a-> im------------> ; LM rw=[ra + (s)im]
 // 1 0 1 1 a-> b-> im------------> ; SM [ra + (s)im]=rb
 // 1 1 * * * * * * * * * * * * * * ; future reserved *MM
@@ -114,7 +114,11 @@ $display("r0[%h]1[%h]2[%h]3[%h]", test.pu.rega.regar[0], test.pu.rega.regar[1],
 			3'b010: begin
 // F E D C B A 9 8 7 6 5 4 3 2 1 0
 // 0 0 0 0 1 0 rw> F op--> a-> b-> ; CAL rw=ra,rb (F=0:NORM/1:DSTB) MV
-		
+				wad = o[9:8];
+				we = `ASSERT;
+				op = o[6:4];
+				ra = o[3:2];
+				rb = o[1:0];
 			end
 			3'b011: begin
 // F E D C B A 9 8 7 6 5 4 3 2 1 0
@@ -146,7 +150,13 @@ $display("r0[%h]1[%h]2[%h]3[%h]", test.pu.rega.regar[0], test.pu.rega.regar[1],
 		3'b001: begin
 // F E D C B A 9 8 7 6 5 4 3 2 1 0
 // 0 0 1 # rw> a-> im------------> ; CAL rw=ra,im (#=0:ADD/1:SUB only)
-			
+			ra = o[9:8];
+			wad = o[11:10];
+			we = `ASSERT;
+			op = SUB;
+			liop = IMM;
+			iv = o[7:0];
+
 		end
 		3'b010: begin
 			case(o[11])
@@ -164,7 +174,14 @@ $display("r0[%h]1[%h]2[%h]3[%h]", test.pu.rega.regar[0], test.pu.rega.regar[1],
 // F E D C B A 9 8 7 6 5 4 3 2 1 0
 // 0 1 0 p 1 1 f f im------------> ; JP/BR fp [PC + (s)im]
 //条件に応じて相対ジャンプ
-				
+					iv = o[7:0];
+					liop = IMM;
+					op = ADD;
+					if (f2 == 1)begin
+						pcs = `ASSERT;
+						pcwe = `ASSERT;
+					end
+					
 				end
 				`NEGATE: begin
 // F E D C B A 9 8 7 6 5 4 3 2 1 0
@@ -200,7 +217,11 @@ $display("r0[%h]1[%h]2[%h]3[%h]", test.pu.rega.regar[0], test.pu.rega.regar[1],
 				2'b10:begin
 // F E D C B A 9 8 7 6 5 4 3 2 1 0
 // 1 0 0 0 rw> 1 0 im------------> ; LIL rw,im (rw=rb)
-					
+					liop = LIL;
+					iv = o[7:0];
+					we = `ASSERT;
+					wad = o[11:10];
+					rb = o[11:10];
 				end
 				2'b11:begin
 // F E D C B A 9 8 7 6 5 4 3 2 1 0

@@ -1,7 +1,7 @@
 `include "pu.vh"
 module rega(input [`RASB:0] arad, brad, output logic [`WIDTH:0] a, b,
 	input we, input [`RASB:0] wad, input [`WIDTH:0] wd,
-	input clk, rst);
+	input clk, rst ,output logic [15:0] result,output logic [15:0] counter);
 	logic [`WIDTH:0] regar [`RAS:0];
 	always @(posedge clk or posedge rst) begin
 		if(rst) begin
@@ -13,4 +13,6 @@ module rega(input [`RASB:0] arad, brad, output logic [`WIDTH:0] a, b,
 	end
 	assign a = regar[arad];
 	assign b = regar[brad];
+	assign result = regar[2];
+	assign counter = regar[3];
 endmodule

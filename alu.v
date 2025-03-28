@@ -36,9 +36,9 @@ module alu(
 				if(rr==0) ze<=1;
 				else ze<=0;
 				if(rr[`WIDTH+1]==1) ca<=1;
-				else ca<=0;
+				else ca<=0; //最上位が１かどうか
 				if(r[`WIDTH]==1) sg<=1;
-				else sg<=0;
+				else sg<=0; //オーバーフロー
 			end
 		end
 	end
